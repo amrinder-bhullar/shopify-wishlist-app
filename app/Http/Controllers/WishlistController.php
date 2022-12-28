@@ -15,7 +15,43 @@ class WishlistController extends Controller
      */
     public function index()
     {
-        //
+        $shop = Auth::user();
+
+        $shopWishlist = Wishlist::where('shop_id', $shop->name)->orderBy('updated_at', 'desc')->get();
+
+        $productsList = [];
+
+        foreach ($shopWishlist as $item) {
+            array_push($productsList, "gid://shopify/Product/{$item->product_id}");
+        }
+
+        $productsList = json_encode($productsList);
+
+        $query = "
+        {
+            nodes(ids: $productsList) {
+              ... on Product {
+                id
+                title
+                handle
+                featuredMedia{
+                  preview{image{url}}
+                }
+                priceRangeV2 {
+                  maxVariantPrice {
+                    amount
+                  }
+                }
+              }
+            }
+          }
+        ";
+
+        $products = $shop->api()->graph($query);
+
+        return view('products', [
+            "products" => $products
+        ]);
     }
 
     /**
@@ -45,14 +81,16 @@ class WishlistController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display/check the specified resource.
      *
      * @param  \App\Models\Wishlist  $wishlist
      * @return \Illuminate\Http\Response
      */
-    public function show(Wishlist $wishlist)
+    public function show(Request $request)
     {
-        //
+        $existsOrNot = Wishlist::where('shop_id', $request->shop_id)->where('product_id', $request->product_id)->where('customer_id', $request->customer_id)->exists();
+
+        return response($existsOrNot);
     }
 
     /**

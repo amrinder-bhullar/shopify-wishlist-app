@@ -3,6 +3,7 @@
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\WishlistController;
 use App\Models\Settings;
+use App\Models\Wishlist;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -28,19 +29,15 @@ Route::middleware(['verify.shopify'])->group(function () {
         ]);
         // dd(request()->path());
     })->name('home');
-    Route::view('/products', 'products')->name('products');
+    Route::get('/products', [WishlistController::class, "index"])->name('products');
     Route::view('/customers', 'customers')->name('customers');
     Route::view('/settings', 'settings')->name('settings');
     Route::post('/configuretheme', [SettingsController::class, 'create']);
-    Route::get('test', function () {
-        $shop = Auth::user();
-        $scriptTags = $shop->api()->rest('GET', '/admin/api/2022-10/script_tags.json');
-
-        return json_encode($scriptTags);
-    });
+    // Route::get('test', [WishlistController::class, "index"]);
 });
 
 // clientside API
 
 Route::post('/api/addToWishlist', [WishlistController::class, "store"]);
 Route::post('/api/removeFromWishlist', [WishlistController::class, "destroy"]);
+Route::post('/api/wishlistItemExists', [WishlistController::class, "show"]);
