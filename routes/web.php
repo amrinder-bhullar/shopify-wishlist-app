@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\WishlistController;
 use App\Models\Settings;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -38,3 +39,8 @@ Route::middleware(['verify.shopify'])->group(function () {
         return json_encode($scriptTags);
     });
 });
+
+// clientside API
+
+Route::post('/api/addToWishlist', [WishlistController::class, "store"]);
+Route::post('/api/removeFromWishlist', [WishlistController::class, "destroy"]);

@@ -1,4 +1,12 @@
-#awishlist-btn {
+.awishlist-btn.active {
     background-color: red;
     color:white;
+    border: 1px solid white;
+}
+
+.awishlist-btn{
+    padding: 10px 20px;
+    background-color: white;
+    color: rgb(48, 48, 48);
+    border: 1px solid black;
 }
