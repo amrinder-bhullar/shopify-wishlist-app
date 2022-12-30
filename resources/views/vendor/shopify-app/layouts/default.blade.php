@@ -18,7 +18,7 @@
 <body>
     <div class="app-wrapper">
         <div class="app-content">
-            <main role="main">
+            <main role="main" class="pb-6">
                 <x-navbar />
                 @yield('content')
             </main>

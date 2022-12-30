@@ -25,6 +25,8 @@
             </div>
             @if ($number)
                 <p class="text-3xl font-semibold text-center text-gray-800">{{ $number }}</p>
+            @else
+                <p class="text-3xl font-semibold text-center text-gray-800">0</p>
             @endif
             @if ($title)
                 <p class="text-lg text-center text-gray-500"> {{ $title }} </p>

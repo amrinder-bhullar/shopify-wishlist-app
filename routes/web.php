@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\WishlistController;
 use App\Models\Settings;
@@ -20,15 +21,8 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::middleware(['verify.shopify'])->group(function () {
-    Route::get('/', function () {
-        $shop = Auth::user();
-        $setting = Settings::where("shop_id", $shop->name)->first();
-        return view('dashboard', [
-            "settings" => $setting
-        ]);
-        // dd(request()->path());
-    })->name('home');
+Route::middleware(['verify.shopify', 'billable'])->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('home');
     Route::get('/products', [WishlistController::class, "index"])->name('products');
     Route::view('/customers', 'customers')->name('customers');
     Route::view('/settings', 'settings')->name('settings');

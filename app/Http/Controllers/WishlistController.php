@@ -6,6 +6,8 @@ use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use function PHPSTORM_META\map;
+
 class WishlistController extends Controller
 {
     /**
@@ -17,8 +19,14 @@ class WishlistController extends Controller
     {
         $shop = Auth::user();
 
-        $shopWishlist = Wishlist::where('shop_id', $shop->name)->orderBy('updated_at', 'desc')->get();
+        $shopWishlist = Wishlist::where('shop_id', $shop->name)
+            ->select('product_id')
+            ->selectRaw('COUNT(product_id) AS count')
+            ->groupBy('product_id')
+            ->orderBy('product_id', 'desc')
+            ->get();
 
+        $shopWishlist = $shopWishlist->unique('product_id');
         $productsList = [];
 
         foreach ($shopWishlist as $item) {
@@ -34,14 +42,11 @@ class WishlistController extends Controller
                 id
                 title
                 handle
-                featuredMedia{
-                  preview{image{url}}
-                }
-                priceRangeV2 {
-                  maxVariantPrice {
-                    amount
+                featuredImage{
+                    url
                   }
-                }
+                onlineStoreUrl
+                totalInventory
               }
             }
           }
@@ -49,8 +54,31 @@ class WishlistController extends Controller
 
         $products = $shop->api()->graph($query);
 
+        // map through the data returned from shopify, check product_id and match them, push count to the single product array
+
+        $returnedProducts = $products['body']->container['data']['nodes'];
+        $newArray = [];
+
+        // foreach ($returnedProducts as $shopifyProduct) {
+        //     foreach ($shopWishlist as $countItem) {
+        //         if (str_contains($shopifyProduct['id'], $countItem['product_id'])) {
+        //             array_push($newArray, $countItem['count']);
+        //         } else {
+        //             array_push($newArray, "count => 0");
+        //         };
+        //     }
+        // }
+
+        for ($i = 0; $i < count($returnedProducts); $i++) {
+            $returnedProducts[$i]['count'] = $shopWishlist[$i]['count'];
+        }
+
+        $containesId = str_contains($products['body']->container['data']['nodes'][0]['id'], $shopWishlist[0]['product_id']);
+
         return view('products', [
-            "products" => $products
+            "products" => $returnedProducts,
+            "productList" => $shopWishlist,
+            "containsID" => $returnedProducts
         ]);
     }
 
